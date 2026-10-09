@@ -1,0 +1,54 @@
+name: Clearance dataset 18 comparison
+on:
+  push:
+    branches: [benchmark-dataset18-clearance-20261010]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Run all 16 dataset 18 samples on each revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          cd source
+          for entry in main:a9982c678cc8f130b2d87c3f6e3f126c20386170 repro:fb609164ba4a8903d96193c85fb4e7bef6d658f2 fix:400e998a242e858b9644547e8beeb2824a8ed1f7; do
+            label=${entry%%:*}
+            sha=${entry#*:}
+            git checkout --detach "$sha"
+            bun install --frozen-lockfile
+            mkdir -p "../results/$label"
+            bash benchmark.sh --pipeline 9 --dataset 18 --concurrency 2 --sample-timeout 360s 2>&1 | tee "../results/$label/run.log"
+            cp benchmark-result.json benchmark-result.txt benchmark-snapshots.html "../results/$label/"
+          done
+      - name: Compare main to repro and repro to fix
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pair in main:repro repro:fix; do
+            base=${pair%%:*}
+            head=${pair#*:}
+            case "$base" in main) base_sha=a9982c678cc8f130b2d87c3f6e3f126c20386170;; repro) base_sha=fb609164ba4a8903d96193c85fb4e7bef6d658f2;; esac
+            case "$head" in repro) head_sha=fb609164ba4a8903d96193c85fb4e7bef6d658f2;; fix) head_sha=400e998a242e858b9644547e8beeb2824a8ed1f7;; esac
+            bun scripts/benchmark/same-machine-results.ts --base-report "../results/$base/benchmark-result.json" --pr-report "../results/$head/benchmark-result.json" --base-sha "$base_sha" --pr-sha "$head_sha" --repository hrithik18k/tscircuit-autorouter --runner-name "$RUNNER_NAME (GitHub-hosted ubuntu-24.04, concurrency 2, Bun 1.3.14, 360s timeout)" --output "../results/$base-to-$head.md"
+            sed -i 's/in one Blacksmith job/in one GitHub-hosted job/' "../results/$base-to-$head.md"
+            cat "../results/$base-to-$head.md" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dataset18-clearance-comparisons
+          path: results
+          retention-days: 30
