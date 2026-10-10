@@ -23,11 +23,13 @@ jobs:
           set -euo pipefail
           mkdir -p results
           cd source
+          git diff --exit-code a9982c678cc8f130b2d87c3f6e3f126c20386170 fb609164ba4a8903d96193c85fb4e7bef6d658f2 -- package.json bun.lock bun.lockb
+          git diff --exit-code a9982c678cc8f130b2d87c3f6e3f126c20386170 400e998a242e858b9644547e8beeb2824a8ed1f7 -- package.json bun.lock bun.lockb
+          timeout 10m bun install --frozen-lockfile
           for entry in main:a9982c678cc8f130b2d87c3f6e3f126c20386170 repro:fb609164ba4a8903d96193c85fb4e7bef6d658f2 fix:400e998a242e858b9644547e8beeb2824a8ed1f7; do
             label=${entry%%:*}
             sha=${entry#*:}
             git checkout --detach "$sha"
-            bun install --frozen-lockfile
             mkdir -p "../results/$label"
             bash benchmark.sh --pipeline 9 --dataset 18 --concurrency 2 --sample-timeout 360s 2>&1 | tee "../results/$label/run.log"
             cp benchmark-result.json benchmark-result.txt benchmark-snapshots.html "../results/$label/"
