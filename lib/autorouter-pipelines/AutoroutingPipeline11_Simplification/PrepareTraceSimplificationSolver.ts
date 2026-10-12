@@ -99,10 +99,12 @@ const hasMixedViaDimensions = (
 ): boolean => {
   const dimensions = trace.route.flatMap((point) =>
     point.route_type === "via"
-      ? [{
-          pad: point.via_diameter ?? defaults.padDiameter,
-          hole: point.via_hole_diameter ?? defaults.holeDiameter,
-        }]
+      ? [
+          {
+            pad: point.via_diameter ?? defaults.padDiameter,
+            hole: point.via_hole_diameter ?? defaults.holeDiameter,
+          },
+        ]
       : [],
   )
   const first = dimensions[0]
