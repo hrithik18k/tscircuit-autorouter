@@ -93,6 +93,27 @@ const getUniformTraceWidth = (
   return firstWidth
 }
 
+const hasMixedViaDimensions = (
+  trace: SimplifiedPcbTrace,
+  defaults: { padDiameter: number; holeDiameter: number },
+): boolean => {
+  const dimensions = trace.route.flatMap((point) =>
+    point.route_type === "via"
+      ? [{
+          pad: point.via_diameter ?? defaults.padDiameter,
+          hole: point.via_hole_diameter ?? defaults.holeDiameter,
+        }]
+      : [],
+  )
+  const first = dimensions[0]
+  if (!first) return false
+  return dimensions.some(
+    ({ pad, hole }) =>
+      Math.abs(pad - first.pad) > WIDTH_TOLERANCE ||
+      Math.abs(hole - first.hole) > WIDTH_TOLERANCE,
+  )
+}
+
 const getViaHoleDiameter = (
   trace: SimplifiedPcbTrace,
   defaultViaHoleDiameter: number,
@@ -160,13 +181,16 @@ export class PrepareTraceSimplificationSolver extends BaseSolver {
     this.seenTraceIds.add(trace.pcb_trace_id)
     const viaDimensions = getViaDimensions(this.preparedInput.srj)
     const uniformTraceWidth = getUniformTraceWidth(trace)
+    const mixedViaDimensions = hasMixedViaDimensions(trace, viaDimensions)
     const { traceToSimplify, leadingTerminalVias, trailingTerminalVias } =
       splitTerminalVias(trace)
     const rootConnectionName =
       this.preparedInput.connMap.getNetConnectedToId(trace.connection_name) ??
       trace.connection_name
+    // HighDensityRoute carries one via diameter for the entire route. Keep
+    // traces with heterogeneous via geometry fixed so no dimensions are lost.
     const mutableHdRoute =
-      uniformTraceWidth === undefined
+      uniformTraceWidth === undefined || mixedViaDimensions
         ? undefined
         : convertSimplifiedPcbTraceToHighDensityRoute(traceToSimplify, {
             layerCount: this.preparedInput.srj.layerCount,
