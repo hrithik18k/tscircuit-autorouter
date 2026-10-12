@@ -41,8 +41,8 @@ test("unchanged simplification preserves mixed via sizes on a full board", async
       convertSrjToGraphicsObject(srj, { traceColorMode: "layer" }),
       { backgroundColor: "white", hideInlineLabels: true },
     )
-  // The repro branch snapshots the input at this same path. Updating it with
-  // the fixed output gives the stacked PR a swipeable full-board image diff.
+  // The repro branch stores the input board at this same path.
+  // The fix updates it to the output for GitHub's swipeable image diff.
   await expect(render(output)).toMatchSvgSnapshot(import.meta.path, {
     svgName: "mixed-via-full-board-before",
   })
