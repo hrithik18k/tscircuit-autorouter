@@ -8,7 +8,7 @@ import { PrepareTraceSimplificationSolver } from "lib/autorouter-pipelines/Autor
 import type { SimpleRouteJson } from "lib/types"
 import { convertSrjToGraphicsObject } from "lib/utils/convertSrjToGraphicsObject"
 
-test("unchanged simplification preserves mixed via sizes on a full board", async () => {
+test("preserves mixed vias on a full board", async () => {
   // Start with the repository's complete RP2040 motor-controller board. Only
   // the two via dimensions on this trace differ from the captured board.
   const input = structuredClone(realBoard) as SimpleRouteJson
@@ -41,8 +41,6 @@ test("unchanged simplification preserves mixed via sizes on a full board", async
       convertSrjToGraphicsObject(srj, { traceColorMode: "layer" }),
       { backgroundColor: "white", hideInlineLabels: true },
     )
-  // The repro branch stores the input board at this same path.
-  // The fix updates it to the output for GitHub's swipeable image diff.
   await expect(render(output)).toMatchSvgSnapshot(import.meta.path, {
     svgName: "mixed-via-full-board-before",
   })
