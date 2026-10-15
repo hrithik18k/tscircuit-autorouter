@@ -116,6 +116,7 @@ export interface ConvertSimplifiedPcbTraceToHighDensityRouteOptions {
   layerCount: number
   defaultTraceThickness: number
   defaultViaDiameter: number
+  defaultViaHoleDiameter?: number
   rootConnectionName: string
 }
 
@@ -125,7 +126,7 @@ export const convertSimplifiedPcbTraceToHighDensityRoute = (
   options: ConvertSimplifiedPcbTraceToHighDensityRouteOptions,
 ): HighDensityRoute => {
   const route: RoutePoint[] = []
-  const vias: Array<{ x: number; y: number }> = []
+  const vias: HighDensityRoute["vias"] = []
   const jumpers: Jumper[] = []
   const traceThickness = getTraceThickness(
     trace.route,
@@ -172,7 +173,12 @@ export const convertSimplifiedPcbTraceToHighDensityRoute = (
         z: endZ,
         traceThickness,
       })
-      vias.push({ x: point.x, y: point.y })
+      vias.push({
+        x: point.x,
+        y: point.y,
+        diameter: point.via_diameter ?? options.defaultViaDiameter,
+        holeDiameter: point.via_hole_diameter ?? options.defaultViaHoleDiameter,
+      })
       continue
     }
 

@@ -172,6 +172,7 @@ export class PrepareTraceSimplificationSolver extends BaseSolver {
             layerCount: this.preparedInput.srj.layerCount,
             defaultTraceThickness: uniformTraceWidth,
             defaultViaDiameter: viaDimensions.padDiameter,
+            defaultViaHoleDiameter: viaDimensions.holeDiameter,
             rootConnectionName,
           })
     const usableMutableHdRoute =
@@ -185,7 +186,10 @@ export class PrepareTraceSimplificationSolver extends BaseSolver {
       leadingTerminalVias,
       trailingTerminalVias,
       uniformTraceWidth,
-      viaHoleDiameter: getViaHoleDiameter(trace, viaDimensions.holeDiameter),
+      viaHoleDiameter: getViaHoleDiameter(
+        traceToSimplify,
+        viaDimensions.holeDiameter,
+      ),
     })
 
     if (!usableMutableHdRoute) {

@@ -51,11 +51,10 @@ test("records mixed vias on a full board", async () => {
   const outputVias = output.traces
     ?.find((candidate) => candidate.pcb_trace_id === traceId)
     ?.route.filter((point) => point.route_type === "via")
-  // Characterize the bug: the second via incorrectly inherits the first size.
   expect(
     outputVias?.map((point) => [point.via_diameter, point.via_hole_diameter]),
   ).toEqual([
     [0.6, 0.3],
-    [0.6, 0.3],
+    [1.0, 0.5],
   ])
 })
