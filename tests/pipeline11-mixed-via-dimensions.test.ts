@@ -3,7 +3,7 @@ import { PrepareTraceSimplificationSolver } from "../lib/autorouter-pipelines/Au
 import { ApplyTraceSimplificationSolver } from "../lib/autorouter-pipelines/AutoroutingPipeline11_Simplification/ApplyTraceSimplificationSolver"
 import type { SimpleRouteJson } from "../lib/types"
 
-test("preserves mixed via dimensions", () => {
+test("records mixed via dimensions", () => {
   const input: SimpleRouteJson = {
     layerCount: 2,
     minTraceWidth: 0.2,

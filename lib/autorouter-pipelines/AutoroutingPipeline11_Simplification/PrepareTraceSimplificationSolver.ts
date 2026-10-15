@@ -183,9 +183,12 @@ export class PrepareTraceSimplificationSolver extends BaseSolver {
     this.seenTraceIds.add(trace.pcb_trace_id)
     const viaDimensions = getViaDimensions(this.preparedInput.srj)
     const uniformTraceWidth = getUniformTraceWidth(trace)
-    const mixedViaDimensions = hasMixedViaDimensions(trace, viaDimensions)
     const { traceToSimplify, leadingTerminalVias, trailingTerminalVias } =
       splitTerminalVias(trace)
+    const mixedViaDimensions = hasMixedViaDimensions(
+      traceToSimplify,
+      viaDimensions,
+    )
     const rootConnectionName =
       this.preparedInput.connMap.getNetConnectedToId(trace.connection_name) ??
       trace.connection_name
@@ -211,7 +214,10 @@ export class PrepareTraceSimplificationSolver extends BaseSolver {
       leadingTerminalVias,
       trailingTerminalVias,
       uniformTraceWidth,
-      viaHoleDiameter: getViaHoleDiameter(trace, viaDimensions.holeDiameter),
+      viaHoleDiameter: getViaHoleDiameter(
+        traceToSimplify,
+        viaDimensions.holeDiameter,
+      ),
     })
 
     if (!usableMutableHdRoute) {

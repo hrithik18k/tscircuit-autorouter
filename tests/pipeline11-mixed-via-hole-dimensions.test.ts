@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test"
-import { ApplyTraceSimplificationSolver } from "lib/autorouter-pipelines/AutoroutingPipeline11_Simplification/ApplyTraceSimplificationSolver"
-import { PrepareTraceSimplificationSolver } from "lib/autorouter-pipelines/AutoroutingPipeline11_Simplification/PrepareTraceSimplificationSolver"
+import { AutoroutingPipelineSolver11_Simplification } from "lib/autorouter-pipelines/AutoroutingPipeline11_Simplification/AutoroutingPipelineSolver11_Simplification"
 import type { SimpleRouteJson } from "lib/types"
 
 test("via drill differences alone keep a trace unchanged", () => {
@@ -52,17 +51,11 @@ test("via drill differences alone keep a trace unchanged", () => {
       },
     ],
   }
-  const prepare = new PrepareTraceSimplificationSolver({
-    inputSrj: input,
-    options: {},
-  })
-  prepare.solve()
-  const preparedInput = prepare.getOutput()
-  expect(preparedInput.mutableHdRoutes).toHaveLength(0)
-  const apply = new ApplyTraceSimplificationSolver({
-    preparedInput,
-    simplifiedHdRoutes: preparedInput.mutableHdRoutes,
-  })
-  apply.solve()
-  expect(apply.getOutput().traces?.[0]?.route).toEqual(input.traces?.[0]?.route)
+  const solver = new AutoroutingPipelineSolver11_Simplification(input)
+  solver.solve()
+  expect(solver.solved).toBe(true)
+  expect(solver.failed).toBe(false)
+  expect(solver.getOutputSimplifiedPcbTraces()[0]!.route).toEqual(
+    input.traces![0]!.route,
+  )
 })

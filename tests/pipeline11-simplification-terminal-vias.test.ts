@@ -43,8 +43,8 @@ test("simplification pipeline preserves terminal vias", () => {
             y: 0,
             from_layer: "top",
             to_layer: "bottom",
-            via_diameter: 0.4,
-            via_hole_diameter: 0.2,
+            via_diameter: 0.8,
+            via_hole_diameter: 0.4,
           },
         ],
       },
@@ -62,6 +62,7 @@ test("simplification pipeline preserves terminal vias", () => {
   const inputVias = input.traces![0]!.route.filter(
     (point) => point.route_type === "via",
   )
+  expect(outputRoute.length).toBeLessThan(input.traces![0]!.route.length)
   expect(outputVias).toEqual(inputVias)
   expect(outputRoute[0]?.route_type).toBe("via")
   expect(outputRoute.at(-1)?.route_type).toBe("via")
