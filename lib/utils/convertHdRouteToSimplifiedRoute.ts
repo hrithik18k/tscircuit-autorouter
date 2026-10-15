@@ -299,23 +299,25 @@ export const convertHdRouteToSimplifiedRoute = (
         })
       } else {
         // Check if a via exists at this position
-        const viaExists = hdRoute.vias.some(
+        const matchingVia = hdRoute.vias.find(
           (via) =>
             Math.abs(via.x - point.x) < 0.001 &&
             Math.abs(via.y - point.y) < 0.001,
         )
 
         // Add a via if one exists
-        if (viaExists) {
+        if (matchingVia) {
+          const holeDiameter =
+            matchingVia.holeDiameter ?? opts.defaultViaHoleDiameter
           result.push({
             route_type: "via",
             x: point.x,
             y: point.y,
             from_layer: layerName,
             to_layer: nextLayerName,
-            via_diameter: hdRoute.viaDiameter,
-            ...(opts.defaultViaHoleDiameter !== undefined
-              ? { via_hole_diameter: opts.defaultViaHoleDiameter }
+            via_diameter: matchingVia.diameter ?? hdRoute.viaDiameter,
+            ...(holeDiameter !== undefined
+              ? { via_hole_diameter: holeDiameter }
               : {}),
           })
         }
